@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">LifeCity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="server_address">Server address</string>
+    <string name="id">Id</string>
+    <string name="start">Start</string>
+    <string name="required_fields">Все поля должны быть заполнены</string>
+    <string name="stop">Stop</string>
+    <string name="save">Сохранить</string>
+    <string name="default_url">http://lctaxi.ru/link/index.php</string>
+
+</resources>
