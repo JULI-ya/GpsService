@@ -40,16 +40,16 @@ public class MainActivity extends ActionBarActivity {
         IntentFilter intentFilter = new IntentFilter(NOTIFICATION_INTENT);
         registerReceiver(notificationReceiver, intentFilter);
 
-        if (isMockLocationEnabed()) {
-            if (mMockDialog == null) {
-                mockDialogShow();
-            }
-        } else {
-            if (mMockDialog != null) {
-                mMockDialog.dismiss();
-                mMockDialog = null;
-            }
-        }
+//        if (isMockLocationEnabed()) {
+//            if (mMockDialog == null) {
+//                mockDialogShow();
+//            }
+//        } else {
+//            if (mMockDialog != null) {
+//                mMockDialog.dismiss();
+//                mMockDialog = null;
+//            }
+//        }
     }
 
     private void mockDialogShow() {
