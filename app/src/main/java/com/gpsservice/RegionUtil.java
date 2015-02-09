@@ -1,17 +1,15 @@
 package com.gpsservice;
 
 
-import android.location.Location;
-
 import com.gpsservice.models.LatLong;
 import com.gpsservice.models.Region;
 
 public class RegionUtil {
 
-    public static boolean coordinateInRegion(Region region, LatLong point) {
+    public static boolean coordinateInRegion(Region region, LatLong point1) {
         boolean isInside = false;
 
-//        LatLong point = new LatLong(55.660243, 37.729713);
+        LatLong point = new LatLong(37.720528, 55.878112);
         //create an array of coordinates from the region boundary list
         LatLong[] boundary = region.getBoundary();
 

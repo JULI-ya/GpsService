@@ -121,7 +121,7 @@ public class GpsService extends Service {
         nameValuePairs.add(new BasicNameValuePair("zone", String.valueOf(zone)));
         nameValuePairs.add(new BasicNameValuePair("lat", String.valueOf(currentCoordinates.getLatitude())));
         nameValuePairs.add(new BasicNameValuePair("long", String.valueOf(currentCoordinates.getLongitude())));
-        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis())));
+        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis() / 1000)));
         HttpClient httpClient = new DefaultHttpClient();
         String paramsString = URLEncodedUtils.format(nameValuePairs, "UTF-8");
         HttpGet httpGet = new HttpGet(mServerAddress + "?" + paramsString);

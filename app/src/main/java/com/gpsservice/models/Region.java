@@ -11,7 +11,7 @@ public abstract class Region {
         for (int i = 0; i < splitted.length; i++) {
             String latLongString = splitted[i];
             String[] latLongSp = latLongString.split(",");
-            LatLong latLong = new LatLong(Double.parseDouble(latLongSp[1]), Double.parseDouble(latLongSp[0]));
+            LatLong latLong = new LatLong(Double.parseDouble(latLongSp[0]), Double.parseDouble(latLongSp[1]));
             boundary[i] = latLong;
         }
         return boundary;
