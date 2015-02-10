@@ -6,10 +6,10 @@ import com.gpsservice.models.Region;
 
 public class RegionUtil {
 
-    public static boolean coordinateInRegion(Region region, LatLong point1) {
+    public static boolean coordinateInRegion(Region region, LatLong point) {
         boolean isInside = false;
 
-        LatLong point = new LatLong(37.720528, 55.878112);
+//        LatLong point = new LatLong(37.696262, 55.722267);
         //create an array of coordinates from the region boundary list
         LatLong[] boundary = region.getBoundary();
 
