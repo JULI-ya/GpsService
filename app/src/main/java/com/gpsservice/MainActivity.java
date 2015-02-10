@@ -191,7 +191,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(NOTIFICATION_INTENT)) {
-//                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
             }
         }
     }
