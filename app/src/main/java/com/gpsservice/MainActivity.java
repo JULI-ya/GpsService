@@ -3,12 +3,14 @@ package com.gpsservice;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -99,6 +101,7 @@ public class MainActivity extends ActionBarActivity {
                 if (!id.isEmpty()) {
                     Cache.saveId(id, MainActivity.this);
                     startGpsService(id);
+                    showNotification(true);
                 } else {
                     Toast.makeText(MainActivity.this, getString(R.string.required_fields), Toast.LENGTH_LONG).show();
                 }
@@ -111,14 +114,36 @@ public class MainActivity extends ActionBarActivity {
                 stopService(new Intent(MainActivity.this, GpsService.class));
                 startButton.setEnabled(true);
                 stopButton.setEnabled(false);
+                showNotification(false);
             }
         });
     }
 
+    private void showNotification(boolean isRunning) {
+        String title;
+        if (isRunning) {
+            title = getString(R.string.service_running);
+        } else {
+            title = getString(R.string.service_stoped);
+        }
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle(title);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(Application.FM_NOTIFICATION_ID, builder.build());
+    }
+
     private void startGpsService(final String id) {
 
-        Location currentLocation = GPSTracker.getLocation(this);
-        if (currentLocation != null) {
+//        Location currentLocation = GPSTracker.getLocation(this, id);
+        if (GPSTracker.isProvidersEnabled(this)) {
 //            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + currentLocation.getLatitude() + "\nLong: " + currentLocation.getLongitude(), Toast.LENGTH_LONG).show();
             Thread thread = new Thread(new Runnable() {
                 @Override
@@ -164,6 +189,7 @@ public class MainActivity extends ActionBarActivity {
                 manager.cancel(Application.FM_NOTIFICATION_ID);
                 stopService(new Intent(MainActivity.this, GpsService.class));
                 finish();
+                android.os.Process.killProcess(android.os.Process.myPid());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

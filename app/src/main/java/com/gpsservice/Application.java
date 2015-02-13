@@ -16,7 +16,8 @@ public class Application extends android.app.Application {
         super.onCreate();
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher);
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle(getString(R.string.service_stoped));
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,

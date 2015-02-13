@@ -15,9 +15,30 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.gpsservice.models.LatLong;
+import com.gpsservice.models.MKAD;
+import com.gpsservice.models.TTK;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+
 public class GPSTracker extends Service {
 
-    private static Location location;
+    private static final String LOG_TAG = "com.gpsservice.GPSTracker";
 
     // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
@@ -25,72 +46,52 @@ public class GPSTracker extends Service {
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
     private static LocationManager locationManager;
+    private static Context mContext;
+    private static String mId;
 
-    public static Location getLocation(Context context) {
-        determineLocation(context);
-        return location;
+
+    public static boolean isProvidersEnabled(Context context) {
+        locationManager = (LocationManager) context
+                .getSystemService(LOCATION_SERVICE);
+        // Getting GPS status
+        boolean isGPSEnabled = locationManager
+                .isProviderEnabled(LocationManager.GPS_PROVIDER);
+        // Getting network status
+        boolean isNetworkEnabled = locationManager
+                .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        return isGPSEnabled || isNetworkEnabled;
     }
 
-    private static Location determineLocation(Context context) {
+    public static void getLocation(Context context, String id) {
+        mContext = context;
+        mId = id;
         try {
-            locationManager = (LocationManager) context
-                    .getSystemService(LOCATION_SERVICE);
-
-            // Getting GPS status
-            boolean isGPSEnabled = locationManager
-                    .isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            // Getting network status
-            boolean isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            // If GPS enabled, get latitude/longitude using GPS Services
-            if (isGPSEnabled) {
-                try {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                } catch (Exception e) {
-                    Looper.prepare();
-                    locationManager.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                }
-                Log.d("GPS Enabled", "GPS Enabled");
-                if (locationManager != null) {
-                    location = locationManager
-                            .getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                }
-                if (location != null)
-                    return location;
-            }
-
-            if (isNetworkEnabled && location == null) {
-                try {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                } catch (Exception e) {
-                    Looper.prepare();
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListener);
-                }
-                Log.d("Network", "Network");
-                if (locationManager != null) {
-                    location = locationManager
-                            .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                }
-                return location;
-            }
+            determineLocation(context);
         } catch (Exception e) {
-            e.printStackTrace();
+            Looper.prepare();
+            determineLocation(context);
         }
-        return null;
+    }
+
+    private static void determineLocation(Context context) {
+
+
+        SmartLocation.with(context).location()
+                .oneFix()
+                .start(new OnLocationUpdatedListener() {
+                    @Override
+                    public void onLocationUpdated(final Location location) {
+                        if (location != null) {
+                            Thread thread = new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    sendRequestToServer(location);
+                                }
+                            });
+                            thread.start();
+                        }
+                    }
+                });
     }
 
 
@@ -127,28 +128,56 @@ public class GPSTracker extends Service {
     }
 
 
-    public static LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location1) {
-            location = location1;
+
+    private static void sendRequestToServer(Location currentLocation) {
+        LatLong currentCoordinates = new LatLong(currentLocation.getLatitude(), currentLocation.getLongitude());
+        if (currentLocation != null) {
+            Intent intent = new Intent(MainActivity.NOTIFICATION_INTENT);
+            boolean isInsideTTK = RegionUtil.coordinateInRegion(new TTK(), currentCoordinates);
+            if (isInsideTTK) {
+                intent.putExtra(MainActivity.RESULT_KEY, "Is inside TTK");
+                mContext.sendBroadcast(intent);
+                sendRequest(1, currentCoordinates);
+                Log.e(LOG_TAG, "isInsideTTK: " + isInsideTTK);
+                return;
+            }
+            boolean isInsideMkad = RegionUtil.coordinateInRegion(new MKAD(), currentCoordinates);
+            if (isInsideMkad) {
+                intent.putExtra(MainActivity.RESULT_KEY, "Is inside MKAD");
+                mContext.sendBroadcast(intent);
+                sendRequest(2, currentCoordinates);
+                Log.e(LOG_TAG, "isInsideMkad: " + isInsideMkad);
+                return;
+            }
+            intent.putExtra(MainActivity.RESULT_KEY, "Out of ranges");
+            mContext.sendBroadcast(intent);
+            sendRequest(3, currentCoordinates);
+        } else {
+            Log.e(LOG_TAG, "Cannot determine location");
         }
+    }
 
-
-        @Override
-        public void onProviderDisabled(String provider) {
+    private static void sendRequest(int zone, LatLong currentCoordinates) {
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("id", mId));
+        nameValuePairs.add(new BasicNameValuePair("zone", String.valueOf(zone)));
+        nameValuePairs.add(new BasicNameValuePair("lat", String.valueOf(currentCoordinates.getLatitude())));
+        nameValuePairs.add(new BasicNameValuePair("long", String.valueOf(currentCoordinates.getLongitude())));
+        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis() / 1000)));
+        HttpClient httpClient = new DefaultHttpClient();
+        String paramsString = URLEncodedUtils.format(nameValuePairs, "UTF-8");
+        HttpGet httpGet = new HttpGet(Cache.getLastServerAddress(mContext) + "?" + paramsString);
+        try {
+            HttpResponse response = httpClient.execute(httpGet);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                Log.i(LOG_TAG, "Request send");
+            } else {
+                Log.e(LOG_TAG, "Request error");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-    };
+    }
 
     @Override
     public IBinder onBind(Intent arg0) {

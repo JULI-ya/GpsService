@@ -11,5 +11,7 @@
     <string name="stop">Stop</string>
     <string name="save">Сохранить</string>
     <string name="default_url">http://lctaxi.ru/link/index.php</string>
+    <string name="service_running">Сервис работает</string>
+    <string name="service_stoped">Сервис не запущен</string>
 
 </resources>
