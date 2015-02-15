@@ -42,16 +42,16 @@ public class MainActivity extends ActionBarActivity {
         IntentFilter intentFilter = new IntentFilter(NOTIFICATION_INTENT);
         registerReceiver(notificationReceiver, intentFilter);
 
-//        if (isMockLocationEnabed()) {
-//            if (mMockDialog == null) {
-//                mockDialogShow();
-//            }
-//        } else {
-//            if (mMockDialog != null) {
-//                mMockDialog.dismiss();
-//                mMockDialog = null;
-//            }
-//        }
+        if (isMockLocationEnabed()) {
+            if (mMockDialog == null) {
+                mockDialogShow();
+            }
+        } else {
+            if (mMockDialog != null) {
+                mMockDialog.dismiss();
+                mMockDialog = null;
+            }
+        }
     }
 
     private void mockDialogShow() {
@@ -217,7 +217,7 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(NOTIFICATION_INTENT)) {
-                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
             }
         }
     }

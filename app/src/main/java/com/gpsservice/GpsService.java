@@ -2,25 +2,9 @@ package com.gpsservice;
 
 import android.app.Service;
 import android.content.Intent;
-import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.gpsservice.models.LatLong;
-import com.gpsservice.models.MKAD;
-import com.gpsservice.models.TTK;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
