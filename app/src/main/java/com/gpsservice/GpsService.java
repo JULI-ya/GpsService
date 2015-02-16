@@ -12,9 +12,6 @@ public class GpsService extends Service {
 
     final String LOG_TAG = "com.gpsservice.GpsService";
 
-    public static final String KEY_SERVER = "server";
-    public static final String KEY_ID = "id";
-    public static final String KEY_INTERVAL = "interval";
 //    public static final String KEY_CUSTOM_LOCATION = "is_custom_location";
 
     private String mId;

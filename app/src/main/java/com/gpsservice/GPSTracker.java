@@ -36,11 +36,6 @@ public class GPSTracker extends Service {
 
     private static final String LOG_TAG = "com.gpsservice.GPSTracker";
 
-    // The minimum distance to change Updates in meters
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
-
-    // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
     private static LocationManager locationManager;
     private static Context mContext;
     private static String mId;

@@ -1,6 +1,7 @@
 package com.gpsservice;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,11 +9,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.Location;
+import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,15 +22,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.gpsservice.alarm.AlarmReceiver;
+
 
 public class MainActivity extends ActionBarActivity {
 
     public static final String NOTIFICATION_INTENT = "notification";
     public static final String RESULT_KEY = "result";
+    public static final String IS_MOCK = "is_mock";
     private Button startButton;
     private Button stopButton;
     private NotificationReceiver notificationReceiver;
     private AlertDialog mMockDialog;
+    private PendingIntent pendingIntent;
 
     //for test
 //    public static String mCustomLatitude;
@@ -42,7 +47,11 @@ public class MainActivity extends ActionBarActivity {
         IntentFilter intentFilter = new IntentFilter(NOTIFICATION_INTENT);
         registerReceiver(notificationReceiver, intentFilter);
 
-        if (isMockLocationEnabed()) {
+        checkForMock();
+    }
+
+    private void checkForMock() {
+        if (isMockLocationEnabled()) {
             if (mMockDialog == null) {
                 mockDialogShow();
             }
@@ -73,6 +82,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
 
         final EditText idEditText = (EditText) findViewById(R.id.id);
 
@@ -111,12 +123,31 @@ public class MainActivity extends ActionBarActivity {
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stopService(new Intent(MainActivity.this, GpsService.class));
-                startButton.setEnabled(true);
-                stopButton.setEnabled(false);
-                showNotification(false);
+                stopClick();
             }
         });
+    }
+
+    private void stopClick() {
+        stop();
+//                stopService(new Intent(MainActivity.this, GpsService.class));
+        startButton.setEnabled(true);
+        stopButton.setEnabled(false);
+        showNotification(false);
+    }
+
+    public void start() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = Cache.getLastSavedInterval(this) * 60 * 1000;
+
+        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+
+        Looper.prepare();
+    }
+
+    public void stop() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(pendingIntent);
     }
 
     private void showNotification(boolean isRunning) {
@@ -149,13 +180,14 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void run() {
                     Intent intent = new Intent(MainActivity.this, GpsService.class);
-                    intent.putExtra(GpsService.KEY_ID, id);
+                    intent.putExtra(Cache.KEY_ID, id);
 //                    if (!mCustomLatitude.isEmpty() && !mCustomLongitude.isEmpty()) {
 //                        intent.putExtra(GpsService.KEY_CUSTOM_LOCATION, true);
 //                    } else {
 //                        intent.putExtra(GpsService.KEY_CUSTOM_LOCATION, false);
 //                    }
-                    startService(intent);
+//                    startService(intent);
+                    start();
                 }
             });
             thread.start();
@@ -206,7 +238,7 @@ public class MainActivity extends ActionBarActivity {
         return false;
     }
 
-    private boolean isMockLocationEnabed() {
+    private boolean isMockLocationEnabled() {
         if (Settings.Secure.getString(getContentResolver(),
                 Settings.Secure.ALLOW_MOCK_LOCATION).equals("0"))
             return false;
@@ -217,7 +249,12 @@ public class MainActivity extends ActionBarActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(NOTIFICATION_INTENT)) {
+                if (intent.getBooleanExtra(IS_MOCK, false)) {
+                    checkForMock();
+                    stopClick();
+                } else {
 //                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
