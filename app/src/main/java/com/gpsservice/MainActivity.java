@@ -253,7 +253,7 @@ public class MainActivity extends ActionBarActivity {
                     checkForMock();
                     stopClick();
                 } else {
-//                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, intent.getStringExtra(RESULT_KEY), Toast.LENGTH_LONG).show();
                 }
             }
         }

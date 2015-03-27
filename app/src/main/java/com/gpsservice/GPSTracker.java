@@ -126,7 +126,7 @@ public class GPSTracker extends Service {
             Intent intent = new Intent(MainActivity.NOTIFICATION_INTENT);
             boolean isInsideTTK = RegionUtil.coordinateInRegion(new TTK(), currentCoordinates);
             if (isInsideTTK) {
-                intent.putExtra(MainActivity.RESULT_KEY, "Is inside TTK");
+                intent.putExtra(MainActivity.RESULT_KEY, "Зона 1");
                 mContext.sendBroadcast(intent);
                 sendRequest(1, currentCoordinates);
                 Log.e(LOG_TAG, "isInsideTTK: " + isInsideTTK);
@@ -134,13 +134,13 @@ public class GPSTracker extends Service {
             }
             boolean isInsideMkad = RegionUtil.coordinateInRegion(new MKAD(), currentCoordinates);
             if (isInsideMkad) {
-                intent.putExtra(MainActivity.RESULT_KEY, "Is inside MKAD");
+                intent.putExtra(MainActivity.RESULT_KEY, "Зона 2");
                 mContext.sendBroadcast(intent);
                 sendRequest(2, currentCoordinates);
                 Log.e(LOG_TAG, "isInsideMkad: " + isInsideMkad);
                 return;
             }
-            intent.putExtra(MainActivity.RESULT_KEY, "Out of ranges");
+            intent.putExtra(MainActivity.RESULT_KEY, "Зона 3");
             mContext.sendBroadcast(intent);
             sendRequest(3, currentCoordinates);
         } else {
@@ -154,7 +154,7 @@ public class GPSTracker extends Service {
         nameValuePairs.add(new BasicNameValuePair("zone", String.valueOf(zone)));
         nameValuePairs.add(new BasicNameValuePair("lat", String.valueOf(currentCoordinates.getLatitude())));
         nameValuePairs.add(new BasicNameValuePair("long", String.valueOf(currentCoordinates.getLongitude())));
-        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis() / 1000)));
+        nameValuePairs.add(new BasicNameValuePair("timestamp", String.valueOf(System.currentTimeMillis())));
         HttpClient httpClient = new DefaultHttpClient();
         String paramsString = URLEncodedUtils.format(nameValuePairs, "UTF-8");
         HttpGet httpGet = new HttpGet(Cache.getLastServerAddress(mContext) + "?" + paramsString);
