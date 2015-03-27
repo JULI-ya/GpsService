@@ -126,7 +126,7 @@ public class GPSTracker extends Service {
             Intent intent = new Intent(MainActivity.NOTIFICATION_INTENT);
             boolean isInsideTTK = RegionUtil.coordinateInRegion(new TTK(), currentCoordinates);
             if (isInsideTTK) {
-                intent.putExtra(MainActivity.RESULT_KEY, "Зона 1");
+                intent.putExtra(MainActivity.RESULT_KEY, "1");
                 mContext.sendBroadcast(intent);
                 sendRequest(1, currentCoordinates);
                 Log.e(LOG_TAG, "isInsideTTK: " + isInsideTTK);
@@ -134,13 +134,13 @@ public class GPSTracker extends Service {
             }
             boolean isInsideMkad = RegionUtil.coordinateInRegion(new MKAD(), currentCoordinates);
             if (isInsideMkad) {
-                intent.putExtra(MainActivity.RESULT_KEY, "Зона 2");
+                intent.putExtra(MainActivity.RESULT_KEY, "2");
                 mContext.sendBroadcast(intent);
                 sendRequest(2, currentCoordinates);
                 Log.e(LOG_TAG, "isInsideMkad: " + isInsideMkad);
                 return;
             }
-            intent.putExtra(MainActivity.RESULT_KEY, "Зона 3");
+            intent.putExtra(MainActivity.RESULT_KEY, "3");
             mContext.sendBroadcast(intent);
             sendRequest(3, currentCoordinates);
         } else {

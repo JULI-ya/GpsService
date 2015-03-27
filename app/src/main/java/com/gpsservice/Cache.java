@@ -9,6 +9,7 @@ public class Cache {
     public static final String KEY_SERVER = "server";
     public static final String KEY_ID = "id";
     public static final String KEY_INTERVAL = "interval";
+    private static String KEY_AM_WORKING = "alarm_manager";
 
 
     public static void saveId(String id, Context context) {
@@ -46,5 +47,17 @@ public class Cache {
         SharedPreferences.Editor ed = sPref.edit();
         ed.putInt(KEY_INTERVAL, interval);
         ed.commit();
+    }
+
+    public static void setAlarmManagerWorking(boolean isWorking, Context context) {
+        SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor ed = sPref.edit();
+        ed.putBoolean(KEY_AM_WORKING, isWorking);
+        ed.commit();
+    }
+
+    public static boolean isAlarmManagerWorking(Context context) {
+        SharedPreferences sPref = PreferenceManager.getDefaultSharedPreferences(context);
+        return sPref.getBoolean(KEY_AM_WORKING, false);
     }
 }

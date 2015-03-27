@@ -95,7 +95,7 @@ public class MainActivity extends ActionBarActivity {
         stopButton = (Button) findViewById(R.id.stop);
         startButton = (Button) findViewById(R.id.start);
 
-        if (isMyServiceRunning()) {
+        if (Cache.isAlarmManagerWorking(this)) {
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
         }
@@ -137,6 +137,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void start() {
+        Cache.setAlarmManagerWorking(true, this);
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         int interval = Cache.getLastSavedInterval(this) * 60 * 1000;
 
@@ -146,6 +147,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void stop() {
+        Cache.setAlarmManagerWorking(false, this);
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         manager.cancel(pendingIntent);
     }
