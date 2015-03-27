@@ -222,6 +222,7 @@ public class MainActivity extends ActionBarActivity {
                 NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 manager.cancel(Application.FM_NOTIFICATION_ID);
                 stopService(new Intent(MainActivity.this, GpsService.class));
+                Cache.setAlarmManagerWorking(false, this);
                 finish();
                 android.os.Process.killProcess(android.os.Process.myPid());
                 return true;
