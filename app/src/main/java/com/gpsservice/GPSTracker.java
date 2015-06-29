@@ -14,8 +14,8 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.gpsservice.models.LatLong;
-import com.gpsservice.models.MKAD;
-import com.gpsservice.models.TTK;
+import com.gpsservice.models.Zone1_EKB;
+import com.gpsservice.models.Zone2_EKB;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -124,7 +124,8 @@ public class GPSTracker extends Service {
         LatLong currentCoordinates = new LatLong(currentLocation.getLatitude(), currentLocation.getLongitude());
         if (currentLocation != null) {
             Intent intent = new Intent(MainActivity.NOTIFICATION_INTENT);
-            boolean isInsideTTK = RegionUtil.coordinateInRegion(new TTK(), currentCoordinates);
+//            boolean isInsideTTK = RegionUtil.coordinateInRegion(new TTK(), currentCoordinates);
+            boolean isInsideTTK = RegionUtil.coordinateInRegion(new Zone1_EKB(), currentCoordinates);
             if (isInsideTTK) {
                 intent.putExtra(MainActivity.RESULT_KEY, "1");
                 mContext.sendBroadcast(intent);
@@ -132,7 +133,8 @@ public class GPSTracker extends Service {
                 Log.e(LOG_TAG, "isInsideTTK: " + isInsideTTK);
                 return;
             }
-            boolean isInsideMkad = RegionUtil.coordinateInRegion(new MKAD(), currentCoordinates);
+//            boolean isInsideMkad = RegionUtil.coordinateInRegion(new MKAD(), currentCoordinates);
+            boolean isInsideMkad = RegionUtil.coordinateInRegion(new Zone2_EKB(), currentCoordinates);
             if (isInsideMkad) {
                 intent.putExtra(MainActivity.RESULT_KEY, "2");
                 mContext.sendBroadcast(intent);
